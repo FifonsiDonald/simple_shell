@@ -1,22 +1,22 @@
 #include "shell.h"
 
 /**
- * print_alias_entry - prints a single alias entry.
+ * print_alias_entry - Prints a single alias entry.
  * @alias_entry: The alias entry to be printed.
  */
 void print_alias_entry(list_t *alias_entry)
 {
-    char *p = NULL;
+	char *p = NULL;
 
-    if (alias_entry)
-    {
-        p = _strchr(alias_entry->str, '=');
-        for (char *a = alias_entry->str; a <= p; a++)
-            _putchar(*a);
-        _putchar('\'');
-        _puts(p + 1);
-        _puts("'\n");
-    }
+	if (alias_entry)
+	{
+		p = _strchr(alias_entry->str, '=');
+		for (char *a = alias_entry->str; a <= p; a++)
+			_putchar(*a);
+		_putchar('\'');
+		_puts(p + 1);
+		_puts("'\n");
+	}
 }
 
 /**
@@ -26,30 +26,37 @@ void print_alias_entry(list_t *alias_entry)
  */
 int _myalias(info_t *info)
 {
-    if (info->argc == 1)
-    {
-        list_t *alias_entry = info->alias;
-        while (alias_entry)
-        {
-            print_alias_entry(alias_entry);
-            alias_entry = alias_entry->next;
-        }
-        return 0;
-    }
+	if (info->argc == 1)
+	{
+		list_t *alias_entry = info->alias;
 
-    for (int i = 1; info->argv[i]; i++)
-    {
-        char *p = _strchr(info->argv[i], '=');
-        if (p)
-        {
-            set_alias(info, info->argv[i]);
-        }
-        else
-        {
-            list_t *alias_entry = node_starts_with(info->alias, info->argv[i], '=');
-            print_alias_entry(alias_entry);
-        }
-    }
+		while (alias_entry)
 
-    return 0;
+		{
+			print_alias_entry(alias_entry);
+			alias_entry = alias_entry->next;
+		}
+
+		return (0);
+	}
+
+	for (int i = 1; info->argv[i]; i++)
+	{
+		char *p = _strchr(info->argv[i], '=');
+
+		if (p)
+		{
+			set_alias(info, info->argv[i]);
+		}
+		else
+		{
+
+			list_t *alias_entry = node_starts_with(info->alias, info->argv[i], '=');
+
+			print_alias_entry(alias_entry);
+
+		}
+	}
+
+	return (0);
 }

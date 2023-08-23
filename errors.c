@@ -6,16 +6,16 @@
  */
 void eputs(char *str)
 {
-    int i = 0;
+	int i = 0;
 
-    if (!str)
-        return;
+	if (!str)
+		return;
 
-    while (str[i] != '\0')
-    {
-        eputchar(str[i]);
-        i++;
-    }
+	while (str[i] != '\0')
+	{
+		eputchar(str[i]);
+		i++;
+	}
 }
 
 /**
@@ -24,17 +24,17 @@ void eputs(char *str)
  */
 void eputchar(char c)
 {
-    static int i = 0;
-    static char buf[WRITE_BUF_SIZE];
+	static int i;
+	static char buf[WRITE_BUF_SIZE];
 
-    if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
-    {
-        write(2, buf, i);
-        i = 0;
-    }
+	if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
+	{
+		write(2, buf, i);
+		i = 0;
+	}
 
-    if (c != BUF_FLUSH)
-        buf[i++] = c;
+	if (c != BUF_FLUSH)
+		buf[i++] = c;
 }
 
 /**
@@ -44,37 +44,37 @@ void eputchar(char c)
  */
 void putfd(char c, int fd)
 {
-    static int i = 0;
-    static char buf[WRITE_BUF_SIZE];
+	static int i;
+	static char buf[WRITE_BUF_SIZE];
 
-    if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
-    {
-        write(fd, buf, i);
-        i = 0;
-    }
+	if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
+	{
+		write(fd, buf, i);
+		i = 0;
+	}
 
-    if (c != BUF_FLUSH)
-        buf[i++] = c;
+	if (c != BUF_FLUSH)
+		buf[i++] = c;
 }
 
 /**
  * putsfd - Prints a string to the given file descriptor.
  * @str: The string to be printed.
  * @fd: The file descriptor to write to.
- * @return: The number of characters written.
+ * Return: The number of characters written.
  */
 int putsfd(char *str, int fd)
 {
-    int i = 0;
+	int i = 0;
 
-    if (!str)
-        return 0;
+	if (!str)
+		return (0);
 
-    while (str[i])
-    {
-        putfd(str[i], fd);
-        i++;
-    }
+	while (str[i])
+	{
+		putfd(str[i], fd);
+		i++;
+	}
 
-    return i;
+	return (i);
 }

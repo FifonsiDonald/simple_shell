@@ -7,27 +7,27 @@
  */
 int err_atoi(char *s)
 {
-    int i = 0;
-    unsigned long int result = 0;
+	int i = 0;
+	unsigned long int result = 0;
 
-    if (*s == '+')
-        s++;
+	if (*s == '+')
+		s++;
 
-    for (i = 0; s[i] != '\0'; i++)
-    {
-        if (s[i] >= '0' && s[i] <= '9')
-        {
-            result *= 10;
-            result += (s[i] - '0');
-            if (result > INT_MAX)
-                return -1; // Integer overflow
-        }
-        else
-        {
-            return -1; // Invalid character encountered
-        }
-    }
-    return (int)result;
+	for (i = 0; s[i] != '\0'; i++)
+	{
+		if (s[i] >= '0' && s[i] <= '9')
+		{
+			result *= 10;
+			result += (s[i] - '0');
+			if (result > INT_MAX)
+				return (-1); /* Integer overflow */
+		}
+		else
+		{
+			return (-1); /* Invalid character encountered */
+		}
+	}
+	return ((int)result);
 }
 
 /**
@@ -37,13 +37,13 @@ int err_atoi(char *s)
  */
 void print_error(info_t *info, char *estr)
 {
-    _eputs(info->fname);
-    _eputs(": ");
-    print_d(info->line_count, STDERR_FILENO);
-    _eputs(": ");
-    _eputs(info->argv[0]);
-    _eputs(": ");
-    _eputs(estr);
+	_eputs(info->fname);
+	_eputs(": ");
+	print_d(info->line_count, STDERR_FILENO);
+	_eputs(": ");
+	_eputs(info->argv[0]);
+	_eputs(": ");
+	_eputs(estr);
 }
 
 /**
@@ -54,24 +54,21 @@ void print_error(info_t *info, char *estr)
  */
 int print_decimal(int input, int fd)
 {
-    int (*print_char)(char) = (fd == STDERR_FILENO) ? _eputchar : _putchar;
-    int count = 0;
-    unsigned int abs_input, current;
+	int (*print_char)(char) = (fd == STDERR_FILENO) ? _eputchar : _putchar;
+	int count = 0;
+	unsigned int abs_input, current;
 
-    if (input < 0)
-    {
-        abs_input = -input;
-        print_char('-');
-        count++;
-    }
-    else
-    {
-        abs_input = input;
-    }
+	if (input < 0)
+	{
+		abs_input = (unsigned int)(-input);
+		print_char('-');
+		count++;
+	}
+	else
+	{
+		abs_input = (unsigned int)input;
+	}
 
-    current = abs_input;
-    // ... (rest of the function implementation)
-
-    return count;
+	current = abs_input;
+	/* Rest of the function implementation */
 }
-
