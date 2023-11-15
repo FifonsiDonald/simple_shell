@@ -1,5 +1,43 @@
 #include "headers.h"
 
+void change_dir(char *dir)
+{
+	char *home = getenv("HOME");
+	char *home_path = NULL;
+
+	if (home != NULL) {
+        home_path = malloc(strlen(home) + 1);
+        if (home_path == NULL) {
+            perror("malloc");
+            exit(EXIT_FAILURE);
+        }
+	_strcpy(home_path, home);
+	}
+	else
+	{
+        fprintf(stderr, "HOME environment variable is not set.\n");
+        exit(EXIT_FAILURE);
+    }
+
+	
+
+	if(dir == NULL)
+	{
+		if(chdir(home_path) != 0)
+	{
+		perror("chdir");
+	}
+	}
+	else
+	{
+		if (chdir(dir) != 0)
+		{
+            perror("chdir");
+        }
+	}
+	free(home_path);
+}
+
 
 int main(int ac, char **av)
 {
@@ -87,6 +125,17 @@ int main(int ac, char **av)
 			{
 				int status;
 				/*int exit_status;*/
+			if (_strcmp(av[0], "cd") == 0) 
+			{
+            if (ac > 1)
+			{
+                change_dir(av[1]);
+            }
+			else
+			{
+                fprintf(stderr, "cd: missing argument\n");
+            }
+			}
 				if ( _strcmp(lineptr, "exit") == 0)
 				{
 					free(lineptr);
@@ -94,33 +143,33 @@ int main(int ac, char **av)
 						exit_status = atoi(av[1]);
 					exit(exit_status);
 				}
-				else if (_strcmp(lineptr, "setenv") == 0)
-				{
-					if (av[1] != NULL && av[2] != NULL && av[3] == NULL)
-					{
-						if (setenv(av[1], av[2], 1) != 0)
-						{
-							perror("setenv");
-						}
-					}
-					else
-					{
-						write(STDERR_FILENO, "Usage: setenv VARIABLE\n", _strlen("Usage: setenv VARIABLE\n"));
-					}
-				}
-				else if (_strcmp(av[0], "unsetenv") == 0)
-				{
-					if (av[1] != NULL && av[2] == NULL)
-					{
-						if (unsetenv(av[1]) != 0)
-						{
-							perror("unsetenv");
-						}
-					}
-					else
-					{
-						write(STDERR_FILENO, "Usage: unsetenv VARIABLE\n", _strlen("Usage: unsetenv VARIABLE\n"));
-					}
+				// else if (_strcmp(lineptr, "setenv") == 0)
+				// {
+				// 	if (av[1] != NULL && av[2] != NULL && av[3] == NULL)
+				// 	{
+				// 		if (setenv(av[1], av[2], 1) != 0)
+				// 		{
+				// 			perror("setenv");
+				// 		}
+				// 	}
+				// 	else
+				// 	{
+				// 		write(STDERR_FILENO, "Usage: setenv VARIABLE\n", _strlen("Usage: setenv VARIABLE\n"));
+				// 	}
+				// }
+				// else if (_strcmp(av[0], "unsetenv") == 0)
+				// {
+				// 	if (av[1] != NULL && av[2] == NULL)
+				// 	{
+				// 		if (unsetenv(av[1]) != 0)
+				// 		{
+				// 			perror("unsetenv");
+				// 		}
+				// 	}
+				// 	else
+				// 	{
+				// 		write(STDERR_FILENO, "Usage: unsetenv VARIABLE\n", _strlen("Usage: unsetenv VARIABLE\n"));
+				// 	}
 				}
 				wait(&status);
 
