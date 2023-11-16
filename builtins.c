@@ -12,8 +12,16 @@ void env()
 }
 void run_env(char **av)
 {
-	if (strcmp(av[0], "env") == 0)
+	extern char **environ;
+	if (_strcmp(av[0], "env") == 0)
 	{
-		env();
+		int i = 0;
+
+		for (; environ[i]; i++)
+		{
+			write(1, environ[i], _strlen(environ[i]));
+			write(1, "\n", 1);
+		}
+		free(av);
 	}
 }

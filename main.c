@@ -103,7 +103,7 @@ int main(int ac, char **av)
 			write(STDOUT_FILENO, prompt, sizeof(prompt) - 1);
 			fflush(stdout);
 
-			chars_got = _getline(&lineptr, &n, fileno(stdin));
+			chars_got = _getline(&lineptr, &n, stdin);
 
 			if (chars_got == -1)
 			{
@@ -126,20 +126,11 @@ int main(int ac, char **av)
 			_strcpy(copy, lineptr);
 			token = strtok(copy, delim);
 
-			/*while (token != NULL)
-			{
-				counter++;
-				token = strtok(NULL, delim);
-				if (strcmp(token, "cd") != 0)
-                                {
-                                        char *dirh = strtok(NULL, " ");
-                                        change_dir(dirh);
-                                }
-                                else
-                                {
-                                        printf ("didn't work here else");
-                                }
-			}*/
+			while (token != NULL)
+			  {
+			  counter++;
+			  token = strtok(NULL, delim);
+			  }
 			counter++;
 			av = malloc(sizeof(char *) * counter);
 			token = strtok(lineptr, delim);
@@ -155,44 +146,44 @@ int main(int ac, char **av)
 			av[i] = NULL;
 			pid = fork();
 
-				if (pid == -1)
-				{
-					perror("fork");
-					exit(EXIT_FAILURE);
-				}
-
-
-				if (pid == 0)
-				{
-					cmdexec(av);
-				}
-				else
-				{
-					if ( _strcmp(lineptr, "exit") == 0)
-					{
-						free(lineptr);
-						if (av[1] != NULL)
-							exit_status = atoi(av[1]);
-						exit(exit_status);
-					}
-				}
-				wait(&status);
-
-				if (WIFEXITED(status))
-				{
-					int exit_status = WEXITSTATUS(status);
-					if (exit_status != 0)
-					{
-						write(STDOUT_FILENO, "Command failed\n", _strlen("Command failed\n"));
-					}
-				}
-				run_env(av);
+			if (pid == -1)
+			{
+				perror("fork");
+				exit(EXIT_FAILURE);
 			}
 
-			free(copy);
-			free(av);
+
+			if (pid == 0)
+			{
+				cmdexec(av);
+			}
+			else
+			{
+				if ( _strcmp(lineptr, "exit") == 0)
+				{
+					free(lineptr);
+					if (av[1] != NULL)
+						exit_status = atoi(av[1]);
+					exit(exit_status);
+				}
+			}
+			wait(&status);
+
+			if (WIFEXITED(status))
+			{
+				int exit_status = WEXITSTATUS(status);
+				if (exit_status != 0)
+				{
+					write(STDOUT_FILENO, "Command failed\n", _strlen("Command failed\n"));
+				}
+			}
+			run_env(av);
 		}
-		return (exit_status);
+
+		free(copy);
+		free(av);
 	}
-	/*return (0);
-	  }*/
+	return (exit_status);
+}
+/*return (0);
+  }*/

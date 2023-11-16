@@ -39,11 +39,41 @@ void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size)
 
 }
 
-
-
-ssize_t _getline(char **lineptr, size_t *n, int fd)
+ssize_t _getline(char **line, size_t *len, FILE *stream)
 {
-	/*char *line;*/
+	char *getline;
+	ssize_t read;
+
+	if (*line == NULL || *len == 0)
+	{
+		*len = 1024;
+		*line = malloc(*len);
+		if (*line == NULL)
+		{
+			return (-1);
+		}
+	}
+
+	getline = fgets(*line, *len, stream);
+	if (getline != NULL)
+	{
+		read = _strlen(*line);
+
+		if (read > 0 && (*line)[read - 1] == '\n')
+		{
+			(*line)[read - 1] = '\0';
+			read--;
+		}
+		return (read);
+	}
+	else
+	{
+		return (-1);
+	}
+}
+
+/*ssize_t _getline(char **lineptr, size_t *n, int fd)
+{
 	static char buffer[BUFFER_SIZE];
 	static size_t buf_pos = 0;
 	static size_t buf_size = 0;
@@ -67,7 +97,6 @@ ssize_t _getline(char **lineptr, size_t *n, int fd)
 		if (*lineptr == NULL)
 			return (-1);
 	}
-	/*line = *lineptr;*/
 
 	while(1)
 	{
@@ -106,4 +135,4 @@ ssize_t _getline(char **lineptr, size_t *n, int fd)
 	(*lineptr)[i] = '\0';
 	return (i);
 
-}
+}*/

@@ -25,8 +25,8 @@ void env();
 void run_env(char **av);
 
 char *_strtok(char *str,const char *delim);
-ssize_t _getline(char **lineptr, size_t *n, int fd);
 size_t _strcspn(const char *str, const char *chars);
+ssize_t _getline(char **line, size_t *len, FILE *stream);
 
 void parse_cmds(char **av);
 /**
