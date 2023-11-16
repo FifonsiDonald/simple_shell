@@ -3,44 +3,79 @@
 void change_dir(char *dir)
 {
 	char *home = getenv("HOME");
-	char *home_path = NULL;
+	char *previous_directory = getenv("OLDPWD");
+	char current_directory[1024];
+	/*char *home_path = NULL;*/
 
-	if (home != NULL) {
-        home_path = malloc(strlen(home) + 1);
-        if (home_path == NULL) {
-            perror("malloc");
-            exit(EXIT_FAILURE);
-        }
-	_strcpy(home_path, home);
+	if (dir == NULL)
+	{
+		dir = home;
+	}
+	else if (_strcmp(dir, "-") == 0)
+	{
+		dir = previous_directory;
+		printf("%s\n", dir);
+	}
+
+	if (getcwd(current_directory, sizeof(current_directory)) == NULL)
+	{
+		perror("getcwd() error");
+		return;
+	}
+
+	if (chdir(dir) == -1)
+	{
+		perror("chdir() error");
+		return;
+	}
+
+	setenv("OLDPWD", current_directory, 1);
+	if (getcwd(current_directory, sizeof(current_directory)) == NULL)
+	{
+		perror("getcwd() error");
 	}
 	else
 	{
-        fprintf(stderr, "HOME environment variable is not set.\n");
-        exit(EXIT_FAILURE);
-    }
+		setenv("PWD", current_directory, 1);
+	}
 
-	
+	/*	if (home != NULL) {
+		home_path = malloc(strlen(home) + 1);
+		if (home_path == NULL) {
+		perror("malloc");
+		exit(EXIT_FAILURE);
+		}
+		_strcpy(home_path, home);
+		}
+		else
+		{
+		fprintf(stderr, "HOME environment variable is not set.\n");
+		exit(EXIT_FAILURE);
+		}
 
-	if(dir == NULL)
-	{
+
+
+		if(dir == NULL)
+		{
 		if(chdir(home_path) != 0)
-	{
+		{
 		perror("chdir");
-	}
-	}
-	else
-	{
+		}
+		}
+		else
+		{
 		if (chdir(dir) != 0)
 		{
-            perror("chdir");
-        }
-	}
-	free(home_path);
+		perror("chdir");
+		}
+		}
+		free(home_path);*/
 }
 
 
 int main(int ac, char **av)
 {
+	int status;
 	int exit_status;
 	char cwd[1024];
 	char *lineptr;
@@ -91,14 +126,24 @@ int main(int ac, char **av)
 			_strcpy(copy, lineptr);
 			token = strtok(copy, delim);
 
-			while (token != NULL)
+			/*while (token != NULL)
 			{
 				counter++;
 				token = strtok(NULL, delim);
-			}
+				if (strcmp(token, "cd") != 0)
+                                {
+                                        char *dirh = strtok(NULL, " ");
+                                        change_dir(dirh);
+                                }
+                                else
+                                {
+                                        printf ("didn't work here else");
+                                }
+			}*/
 			counter++;
 			av = malloc(sizeof(char *) * counter);
 			token = strtok(lineptr, delim);
+
 
 			for (i = 0; token != NULL; i++)
 			{
@@ -110,66 +155,26 @@ int main(int ac, char **av)
 			av[i] = NULL;
 			pid = fork();
 
-			if (pid == -1)
-			{
-				perror("fork");
-				exit(EXIT_FAILURE);
-			}
-
-
-			if (pid == 0)
-			{
-				cmdexec(av);
-			}
-			else
-			{
-				int status;
-				/*int exit_status;*/
-			if (_strcmp(av[0], "cd") == 0) 
-			{
-            if (ac > 1)
-			{
-                change_dir(av[1]);
-            }
-			else
-			{
-                fprintf(stderr, "cd: missing argument\n");
-            }
-			}
-				if ( _strcmp(lineptr, "exit") == 0)
+				if (pid == -1)
 				{
-					free(lineptr);
-					if (av[1] != NULL)
-						exit_status = atoi(av[1]);
-					exit(exit_status);
+					perror("fork");
+					exit(EXIT_FAILURE);
 				}
-				// else if (_strcmp(lineptr, "setenv") == 0)
-				// {
-				// 	if (av[1] != NULL && av[2] != NULL && av[3] == NULL)
-				// 	{
-				// 		if (setenv(av[1], av[2], 1) != 0)
-				// 		{
-				// 			perror("setenv");
-				// 		}
-				// 	}
-				// 	else
-				// 	{
-				// 		write(STDERR_FILENO, "Usage: setenv VARIABLE\n", _strlen("Usage: setenv VARIABLE\n"));
-				// 	}
-				// }
-				// else if (_strcmp(av[0], "unsetenv") == 0)
-				// {
-				// 	if (av[1] != NULL && av[2] == NULL)
-				// 	{
-				// 		if (unsetenv(av[1]) != 0)
-				// 		{
-				// 			perror("unsetenv");
-				// 		}
-				// 	}
-				// 	else
-				// 	{
-				// 		write(STDERR_FILENO, "Usage: unsetenv VARIABLE\n", _strlen("Usage: unsetenv VARIABLE\n"));
-				// 	}
+
+
+				if (pid == 0)
+				{
+					cmdexec(av);
+				}
+				else
+				{
+					if ( _strcmp(lineptr, "exit") == 0)
+					{
+						free(lineptr);
+						if (av[1] != NULL)
+							exit_status = atoi(av[1]);
+						exit(exit_status);
+					}
 				}
 				wait(&status);
 
@@ -181,16 +186,13 @@ int main(int ac, char **av)
 						write(STDOUT_FILENO, "Command failed\n", _strlen("Command failed\n"));
 					}
 				}
+				run_env(av);
 			}
 
-			run_env(av);
 			free(copy);
 			free(av);
 		}
 		return (exit_status);
 	}
-	else
-	{
-	}
-	return (0);
-}
+	/*return (0);
+	  }*/
