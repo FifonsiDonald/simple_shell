@@ -1,5 +1,5 @@
-#ifndef HEADERS_H 
-#define HEADERS_H 
+#ifndef HEADERS_H
+#define HEADERS_H
 
 #define WRITE_BUFF_SIZE 1024
 #define BUFF_FLUSH '\n'
@@ -8,26 +8,31 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h> 
+#include <sys/wait.h>
 
 char *_strcpy(char *, char *);
 char *_strdup(const char *);
 void _puts(char *);
 int _putchar(char);
 int _strlen(const char *);
-int _strcmp(const char *,const char *);
+int _strcmp(const char *, const char *);
 char *starts_with(const char *, const char *);
 char *_strcat(char *, char *);
 
-void env();
+void env(void);
 void run_env(char **av);
 
-char *_strtok(char *str,const char *delim);
+char *_strtok(char *str, const char *delim);
 size_t _strcspn(const char *str, const char *chars);
 ssize_t _getline(char **line, size_t *len, FILE *stream);
 
+void change_dir(char *dir);
+void print_prompt(void);
+void handle_input(char **lineptr, size_t *n);
+void tokenize_input(char *lineptr, char ***av);
+void execute_command(char **av, int *exit_status);
 void parse_cmds(char **av);
 /**
  *struct passinfo - contains pseudo-arguements to pass into a function,

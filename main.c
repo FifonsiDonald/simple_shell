@@ -1,189 +1,152 @@
 #include "headers.h"
 
-void change_dir(char *dir)
+/**
+ * print_prompt -  Prints the command prompt.
+ *
+ * Return: print prompt.
+ */
+void print_prompt(void)
 {
-	char *home = getenv("HOME");
-	char *previous_directory = getenv("OLDPWD");
-	char current_directory[1024];
-	/*char *home_path = NULL;*/
+	char prompt[] = "#cisfun$ ";
 
-	if (dir == NULL)
-	{
-		dir = home;
-	}
-	else if (_strcmp(dir, "-") == 0)
-	{
-		dir = previous_directory;
-		printf("%s\n", dir);
-	}
+	write(STDOUT_FILENO, prompt, sizeof(prompt) - 1);
+	fflush(stdout);
+}
 
-	if (getcwd(current_directory, sizeof(current_directory)) == NULL)
-	{
-		perror("getcwd() error");
-		return;
-	}
+/**
+ * handle_input - Reads user input from standard input.
+ *
+ * @lineptr:lineptr Pointer to the buffer for storing the input line.
+ * @n: Size of the buffer.
+ * Return: input.
+ */
+void handle_input(char **lineptr, size_t *n)
+{
+	ssize_t chars_got = getline(lineptr, n, stdin);
 
-	if (chdir(dir) == -1)
+	if (chars_got == -1)
 	{
-		perror("chdir() error");
-		return;
+		write(STDOUT_FILENO, " \nGoodbye!...\n \n",
+		sizeof(" \nGoodbye!...\n \n") - 1);
+		exit(-1);
 	}
 
-	setenv("OLDPWD", current_directory, 1);
-	if (getcwd(current_directory, sizeof(current_directory)) == NULL)
-	{
-		perror("getcwd() error");
-	}
-	else
-	{
-		setenv("PWD", current_directory, 1);
-	}
-
-	/*	if (home != NULL) {
-		home_path = malloc(strlen(home) + 1);
-		if (home_path == NULL) {
-		perror("malloc");
-		exit(EXIT_FAILURE);
-		}
-		_strcpy(home_path, home);
-		}
-		else
-		{
-		fprintf(stderr, "HOME environment variable is not set.\n");
-		exit(EXIT_FAILURE);
-		}
-
-
-
-		if(dir == NULL)
-		{
-		if(chdir(home_path) != 0)
-		{
-		perror("chdir");
-		}
-		}
-		else
-		{
-		if (chdir(dir) != 0)
-		{
-		perror("chdir");
-		}
-		}
-		free(home_path);*/
+	(*lineptr)[_strcspn(*lineptr, "\n")] = '\0';
 }
 
 
-int main(int ac, char **av)
+/**
+ * tokenize_input - Tokenizes the input line into command arguments.
+ *
+ * @lineptr: lineptr Input line to be tokenized.
+ * @av: Pointer to the array of command arguments.
+ * Return: tokenized input.
+ */
+void tokenize_input(char *lineptr, char ***av)
 {
-	int status;
-	int exit_status;
-	char cwd[1024];
-	char *lineptr;
-	size_t n=0;
-	ssize_t chars_got;
-	char *copy = NULL;
-	const char *delim = " \n";
-	char *token;
-	int counter = 0;
+	int *counter;
+	char *token = strtok(lineptr, " ");
 	int i;
-	pid_t pid;
-	(void)ac;
-	exit_status = 0;
+
+	while (token != NULL)
+	{
+		counter++;
+		token = strtok(NULL, " ");
+	}
+
+	counter++;
+	*av = malloc(sizeof(char *) * (*counter));
+
+	token = strtok(lineptr, " ");
+
+	for (i = 0; token != NULL; i++)
+	{
+		(*av)[i] = malloc(sizeof(char) * _strlen(token));
+		_strcpy((*av)[i], token);
+		token = strtok(NULL, " ");
+	}
+
+	(*av)[i] = NULL;
+}
+/**
+ * execute_command - Executes a command with its arguments.
+ *
+ * @av: Array of command arguments.
+ * @exit_status: Pointer to the exit status variable.
+ * Return: executed commands.
+ */
+void execute_command(char **av, int *exit_status)
+{
+	pid_t pid = fork();
+
+	if (pid == -1)
+	{
+		perror("fork");
+		exit(EXIT_FAILURE);
+	}
+
+	if (pid == 0)
+	{
+		cmdexec(av);
+	}
+	else
+	{
+		if (_strcmp(av[0], "exit") == 0)
+		{
+			if (av[1] != NULL)
+				*exit_status = atoi(av[1]);
+			free(av[0]);
+			av[0] = NULL;
+			exit(*exit_status);
+		}
+	}
+	wait(NULL);
+}
+
+/**
+ * main - The main function of the program.
+ *
+ * Return: The exit status of the program.
+ */
+int main(void)
+{
+	/*int status;*/
+	int exit_status = 0;
+	char cwd[1024];
+	char *lineptr = NULL;
+	size_t n = 0;
+	char *copy;
+	char **command_args;
+	/*int counter;*/
 
 	if (isatty(STDIN_FILENO))
 	{
-
 		getcwd(cwd, sizeof(cwd));
 
 		while (1)
 		{
-			char prompt[] = "#cisfun$ ";
-			char byeprompt[] = "Goodbye!...";
-			char newline[] = " \n";
-			write(STDOUT_FILENO, prompt, sizeof(prompt) - 1);
-			fflush(stdout);
 
-			chars_got = _getline(&lineptr, &n, stdin);
+			print_prompt();
+			handle_input(&lineptr, &n);
 
-			if (chars_got == -1)
-			{
-				write(STDOUT_FILENO, newline, sizeof(newline) - 1);
-
-				write(STDOUT_FILENO, byeprompt, sizeof(byeprompt) - 1);
-
-				write(STDOUT_FILENO, newline, sizeof(newline) - 1);
-
-				return (-1);
-			}
-			lineptr[_strcspn(lineptr, "\n")] = '\0';
-
-			copy = malloc(sizeof(char) * chars_got);
-
-			if (copy == NULL)
-			{
-				return (-1);
-			}
+			copy = malloc(sizeof(char) * n);
 			_strcpy(copy, lineptr);
-			token = strtok(copy, delim);
 
-			while (token != NULL)
-			  {
-			  counter++;
-			  token = strtok(NULL, delim);
-			  }
-			counter++;
-			av = malloc(sizeof(char *) * counter);
-			token = strtok(lineptr, delim);
+			command_args = NULL;
 
+			tokenize_input(copy, &command_args);
 
-			for (i = 0; token != NULL; i++)
+			execute_command(command_args, &exit_status);
+			/*change_dir(command_args);*/
+
+			if (exit_status != 0)
 			{
-				av[i] = malloc(sizeof(char) * _strlen(token));
-				_strcpy(av[i], token);
-
-				token = strtok(NULL, delim);
+				write(STDOUT_FILENO, "Command failed\n", _strlen("Command failed\n"));
 			}
-			av[i] = NULL;
-			pid = fork();
-
-			if (pid == -1)
-			{
-				perror("fork");
-				exit(EXIT_FAILURE);
-			}
-
-
-			if (pid == 0)
-			{
-				cmdexec(av);
-			}
-			else
-			{
-				if ( _strcmp(lineptr, "exit") == 0)
-				{
-					free(lineptr);
-					if (av[1] != NULL)
-						exit_status = atoi(av[1]);
-					exit(exit_status);
-				}
-			}
-			wait(&status);
-
-			if (WIFEXITED(status))
-			{
-				int exit_status = WEXITSTATUS(status);
-				if (exit_status != 0)
-				{
-					write(STDOUT_FILENO, "Command failed\n", _strlen("Command failed\n"));
-				}
-			}
-			run_env(av);
+			run_env(command_args);
+			free(copy);
 		}
-
-		free(copy);
-		free(av);
+		free(lineptr);
 	}
 	return (exit_status);
 }
-/*return (0);
-  }*/
